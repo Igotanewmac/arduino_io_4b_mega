@@ -215,7 +215,16 @@ uint8_t tanglib_read( uint16_t wideaddress ) {
 
 
 
+void tanglib_execute_and_wait() {
 
+    digitalWrite( TANGLIB_EXECUTE , HIGH );
+
+    while ( !digitalRead( TANGLIB_ISFINISHED ) ){delay(1);};
+
+    digitalWrite( TANGLIB_EXECUTE , LOW );
+
+
+}
 
 
 

@@ -296,6 +296,7 @@ void menucommand_02() {
 
 
 void menucommand_03() {
+  test03();
   while(1);
 }
 
@@ -405,6 +406,34 @@ void test02() {
 
 
 
+
+
+
+
+
+
+
+void test03() {
+
+  lcd.clear();
+  lcd.print("Execution Test!");
+
+  tanglib_reset();
+
+  tanglib_write( 0b1000000000000000 , 0x01 );
+
+  tanglib_execute_and_wait();
+
+  lcd.setCursor(0,1);
+  lcd.print("pass!");
+
+
+
+
+
+
+
+}
 
 
 

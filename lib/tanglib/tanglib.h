@@ -68,7 +68,7 @@ uint8_t tanglib_read( uint16_t wideaddress );
 
 
 
-
+void tanglib_execute_and_wait();
 
 
 

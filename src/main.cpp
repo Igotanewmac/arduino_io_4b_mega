@@ -301,10 +301,12 @@ void menucommand_03() {
 }
 
 void menucommand_04() {
+  test04();
   while(1);
 }
 
 void menucommand_05() {
+  test05();
   while(1);
 }
 
@@ -376,7 +378,7 @@ void test02() {
   lcd.print("Test 02");
 
 
-  for ( uint32_t i = 0 ; i < 16383 ; i++ ) {
+  for ( uint32_t i = 0 ; i < 65535 ; i++ ) {
     tanglib_write( i , (uint8_t)(i&0xFF) );
   }
 
@@ -385,12 +387,12 @@ void test02() {
   lcd.print("Checking");
 
 
-  for ( uint32_t i = 0 ; i < 16383 ; i++ ) {
+  for ( uint32_t i = 0 ; i < 65535 ; i++ ) {
     if ( tanglib_read( i ) != (uint8_t)(i&0xFF) ) {
       lcd.clear();
       lcd.print("Fail!");
       lcd.setCursor(0,1);
-      lcd.print(i);
+      lcd.print(i , HEX );
       lcd.print(":");
       lcd.print((uint8_t)(i&0xFF));
       lcd.print(":");
@@ -420,7 +422,8 @@ void test03() {
 
   tanglib_reset();
 
-  tanglib_write( 0b1000000000000000 , 0x01 );
+  tanglib_write( 0b1000000000000000 , 0x00 );
+  tanglib_write( TANG_CMD_END , 0x01 );
 
   tanglib_execute_and_wait();
 
@@ -438,9 +441,201 @@ void test03() {
 
 
 
+void test04() {
+
+  lcd.clear();
+  lcd.print("Register Test");
+
+  uint16_t address = TANG_CMD_START;
+
+  tanglib_reset();
+
+  tanglib_write( address++ , 0x10 );
+  tanglib_write( address++ , TANG_BANKA_KEY );
+  tanglib_write( address++ , 0x11 );
+  tanglib_write( address++ , 0x01 );
+  
+  tanglib_execute_and_wait();
+
+  lcd.setCursor(0,1);
+
+
+  lcd.print( tanglib_read( TANG_SRC_START ) , HEX );
 
 
 
+}
+
+
+
+
+
+
+
+void test05() {
+
+  lcd.clear();
+  lcd.print("Bankfill Test");
+  lcd.setCursor(0,1);
+
+  tanglib_reset();
+
+
+
+  uint16_t address = TANG_CMD_START;
+  uint8_t testbyte = 0xAA;
+
+  // load bank register
+  tanglib_write( address++ , 0x10 );
+  tanglib_write( address++ , TANG_BANKA_SRC );
+  
+  // fill bank A with immedeate
+  tanglib_write( address++ , 0x14 );
+  tanglib_write( address++ , testbyte );
+  
+  // halt
+  tanglib_write( address++ , 0x01 );
+  
+  tanglib_execute_and_wait();
+
+
+  // now check bank was written
+  for ( uint32_t i = TANG_SRC_START ; i <= TANG_SRC_END ; i++ ) {
+
+      if ( tanglib_read( i ) != testbyte ) {
+        lcd.clear();
+        lcd.print("Fail! src");
+        lcd.setCursor(0,1);
+        lcd.print(i,HEX);
+        lcd.print(":");
+        lcd.print( tanglib_read( i ) );
+        while (1);
+      }
+
+  }
+
+
+  lcd.print("S:OK");
+
+
+
+
+
+  address = TANG_CMD_START;
+  testbyte = 0x55;
+
+  // load bank register
+  tanglib_write( address++ , 0x10 );
+  tanglib_write( address++ , TANG_BANKA_KEY );
+  
+  // fill bank A with immedeate
+  tanglib_write( address++ , 0x14 );
+  tanglib_write( address++ , testbyte );
+  
+  // halt
+  tanglib_write( address++ , 0x01 );
+  
+  tanglib_execute_and_wait();
+
+
+  // now check bank was written
+  for ( uint32_t i = TANG_KEY_START ; i <= TANG_KEY_END ; i++ ) {
+
+      if ( tanglib_read( i ) != testbyte ) {
+        lcd.clear();
+        lcd.print("Fail! key");
+        lcd.setCursor(0,1);
+        lcd.print(i,HEX);
+        lcd.print(":");
+        lcd.print( tanglib_read( i ) );
+        while (1);
+      }
+
+  }
+
+
+  lcd.print("K:OK");
+
+
+
+
+  address = TANG_CMD_START;
+  testbyte = 0x01;
+
+  // load bank register
+  tanglib_write( address++ , 0x10 );
+  tanglib_write( address++ , TANG_BANKA_CMD );
+  
+  // fill bank A with immedeate
+  tanglib_write( address++ , 0x14 );
+  tanglib_write( address++ , testbyte );
+  
+  // halt
+  tanglib_write( address++ , 0x01 );
+  
+  tanglib_execute_and_wait();
+
+
+  // now check bank was written
+  for ( uint32_t i = TANG_CMD_START ; i <= TANG_CMD_END ; i++ ) {
+
+      if ( tanglib_read( i ) != testbyte ) {
+        lcd.clear();
+        lcd.print("Fail! cmd");
+        lcd.setCursor(0,1);
+        lcd.print(i,HEX);
+        lcd.print(":");
+        lcd.print( tanglib_read( i ) );
+        while (1);
+      }
+
+  }
+
+
+  lcd.print("C:OK");
+
+
+
+
+  address = TANG_CMD_START;
+  testbyte = 0xAA;
+
+  // load bank register
+  tanglib_write( address++ , 0x10 );
+  tanglib_write( address++ , TANG_BANKA_DST );
+  
+  // fill bank A with immedeate
+  tanglib_write( address++ , 0x14 );
+  tanglib_write( address++ , testbyte );
+  
+  // halt
+  tanglib_write( address++ , 0x01 );
+  
+  tanglib_execute_and_wait();
+
+
+  // now check bank was written
+  for ( uint32_t i = TANG_DST_START ; i <= TANG_DST_END ; i++ ) {
+
+      if ( tanglib_read( i ) != testbyte ) {
+        lcd.clear();
+        lcd.print("Fail! dst");
+        lcd.setCursor(0,1);
+        lcd.print(i,HEX);
+        lcd.print(":");
+        lcd.print( tanglib_read( i ) , HEX);
+        while (1);
+      }
+
+  }
+
+
+  lcd.print("D:OK");
+
+
+
+
+}
 
 
 

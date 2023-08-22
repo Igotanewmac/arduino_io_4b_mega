@@ -296,12 +296,11 @@ void menucommand_02() {
 
 
 void menucommand_03() {
-  test08();
+  test09();
   while(1);
 }
 
 void menucommand_04() {
-  test07();
   while(1);
 }
 
@@ -1082,7 +1081,72 @@ uint16_t address = TANG_CMD_START;
 
 
 
+// test09  test inc and dec
 
+// program
+// load immedeate into usr_data_0
+// increment
+// increment
+// increment
+// load immedeate value into wideptr
+// load immedeate value into register select
+// perform copy to memory
+// halt
+
+
+void test09() {
+
+
+  lcd.clear();
+  lcd.print("Test 09");
+
+  uint16_t address = TANG_CMD_START;
+
+  tanglib_reset();
+  
+  // program
+  // load immedeate into usr_data_0
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x05 );
+  // increment
+  tanglib_write( address++ , 0x34 );
+  tanglib_write( address++ , 0x00 );
+  // increment
+  tanglib_write( address++ , 0x34 );
+  tanglib_write( address++ , 0x00 );
+  // increment
+  tanglib_write( address++ , 0x34 );
+  tanglib_write( address++ , 0x00 );
+  // load immedeate value into wideptr
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x80 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x00 );
+  
+  // load immedeate value into register select
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x80 );
+  
+  // perform copy to memory
+  tanglib_write( address++ , 0x23 );
+  
+  // halt
+  tanglib_write( address++ , 0x01 );
+
+  tanglib_execute_and_wait();
+  
+
+  lcd.setCursor(0,1);
+  lcd.print( tanglib_read( 0x0000 ) , HEX );
+
+
+
+
+}
 
 
 

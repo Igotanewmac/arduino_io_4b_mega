@@ -296,17 +296,16 @@ void menucommand_02() {
 
 
 void menucommand_03() {
-  test03();
+  test08();
   while(1);
 }
 
 void menucommand_04() {
-  test04();
+  test07();
   while(1);
 }
 
 void menucommand_05() {
-  test05();
   while(1);
 }
 
@@ -639,6 +638,443 @@ void test05() {
 
 
 
+
+
+
+
+
+// test06 register select register test
+
+void test06() {
+
+  lcd.clear();
+  lcd.print("Register Select");
+  lcd.setCursor(0,1);
+
+  uint16_t address = TANG_CMD_START;
+
+  tanglib_reset();
+
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x01 );
+  tanglib_write( address++ , 0x81 );
+  tanglib_write( address++ , 0x21 );
+  tanglib_write( address++ , 0x01 );
+  
+  tanglib_execute_and_wait();
+
+  lcd.setCursor(0,1);
+  lcd.print( tanglib_read( 0x0000 ) , BIN );
+  lcd.setCursor(8,1);
+  lcd.print( tanglib_read( 0x0001 ) , BIN );
+
+}
+
+
+
+
+
+
+
+
+// test07 register read-write test
+
+// program
+
+// load 0xAA into usr_data_0
+// 0x24 load immedeate into register
+// 0x00 usr_data_0 mask
+// 0xAA The value to load
+
+// load 0x0000 into usr_wideptr_0
+// 0x24 load immedeate into register
+// 0x80 usr_wideptr_0 high byte mask
+// 0x00 the value to load
+// 0x24 load immedeate into register
+// 0x40 usr_wideptr_0 low byte mask
+// 0x00 the value to load
+
+// load A->B into register select
+// 0x20 load immedeate into register select register
+// 0x00 usr_data_0 mask
+// 0x80 usr_wideptr_0 mask
+
+// copy register byte A to wideptr B
+// 0x23 write register byte A to wideptr B
+
+// halt
+// 0x01 Halt and signal finished.
+
+
+
+void test07() {
+
+  lcd.clear();
+  lcd.print("Register Test");
+
+
+  uint16_t address = TANG_CMD_START;
+
+  uint8_t testbyte = 0xDE;
+
+  tanglib_reset();
+
+  // program
+
+  // load 0xAA into usr_data_0
+  // 0x24 load immedeate into register
+  tanglib_write( address++ , 0x24 );
+  // 0x00 usr_data_0 mask
+  tanglib_write( address++ , 0x00 );
+  // 0xAA The value to load
+  tanglib_write( address++ , testbyte );
+  
+  // load 0x0000 into usr_wideptr_0
+  // 0x24 load immedeate into register
+  tanglib_write( address++ , 0x24 );
+  // 0x80 usr_wideptr_0 high byte mask
+  tanglib_write( address++ , 0x80 );
+  // 0x00 the value to load
+  tanglib_write( address++ , 0x00 );
+  // 0x24 load immedeate into register
+  tanglib_write( address++ , 0x24 );
+  // 0x40 usr_wideptr_0 low byte mask
+  tanglib_write( address++ , 0x40 );
+  // 0x00 the value to load
+  tanglib_write( address++ , 0x00 );
+  
+  // load A->B into register select
+  // 0x20 load immedeate into register select register
+  tanglib_write( address++ , 0x20 );
+  // 0x00 usr_data_0 mask
+  tanglib_write( address++ , 0x00 );
+  // 0x80 usr_wideptr_0 mask
+  tanglib_write( address++ , 0x80 );
+  
+  // copy register byte A to wideptr B
+  // 0x23 write register byte A to the location pointed to by wideptr B
+  tanglib_write( address++ , 0x23 );
+  
+  // halt
+  // 0x01 Halt and signal finished.
+  tanglib_write( address++ , 0x01 );
+  
+
+  tanglib_execute_and_wait();
+
+
+  lcd.setCursor(0,1);
+  lcd.print( tanglib_read( 0x0000 ) , HEX );
+
+
+}
+
+
+
+
+
+
+
+
+// test08 big test of all registers
+
+// program
+
+// load immedeate into each byte of register
+
+// copy them all to memory
+
+// read them all out
+
+// check them.
+
+
+void test08() {
+
+  lcd.clear();
+  lcd.print("register bigtest");
+
+
+
+uint16_t address = TANG_CMD_START;
+
+  
+  address = TANG_CMD_START;
+  tanglib_reset();
+  
+  // load 16 bytes of data register
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x01 );
+  tanglib_write( address++ , 0x01 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x02 );
+  tanglib_write( address++ , 0x02 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x03 );
+  tanglib_write( address++ , 0x03 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x04 );
+  tanglib_write( address++ , 0x04 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x05 );
+  tanglib_write( address++ , 0x05 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x06 );
+  tanglib_write( address++ , 0x06 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x07 );
+  tanglib_write( address++ , 0x07 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x08 );
+  tanglib_write( address++ , 0x08 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x09 );
+  tanglib_write( address++ , 0x09 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x0A );
+  tanglib_write( address++ , 0x0A );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x0B );
+  tanglib_write( address++ , 0x0B );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x0C );
+  tanglib_write( address++ , 0x0C );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x0D );
+  tanglib_write( address++ , 0x0D );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x0E );
+  tanglib_write( address++ , 0x0E );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x0F );
+  tanglib_write( address++ , 0x0F );
+  
+  
+  
+  // set output widptr high
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x80 );
+  tanglib_write( address++ , 0x00 );
+  
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x00 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x01 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x01 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x02 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x02 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x03 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x03 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x04 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x04 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x05 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x05 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x06 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x06 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x07 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x07 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x08 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x08 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x09 );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x09 );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x0A );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x0A );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x0B );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x0B );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x0C );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x0C );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x0D );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x0D );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x0E );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x0E );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  // set output wideptr low
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x0F );
+  // set register select register
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x0F );
+  tanglib_write( address++ , 0x00 );
+  // do copy
+  tanglib_write( address++ , 0x23 );
+  
+  
+  
+  tanglib_write( address++ , 0x01 );
+  
+  
+  tanglib_execute_and_wait();
+
+
+  lcd.setCursor(0,1);
+  lcd.print( tanglib_read( 0x0000 ) , HEX );
+  lcd.print( tanglib_read( 0x0001 ) , HEX );
+  lcd.print( tanglib_read( 0x0002 ) , HEX );
+  lcd.print( tanglib_read( 0x0003 ) , HEX );
+  lcd.print( tanglib_read( 0x0004 ) , HEX );
+  lcd.print( tanglib_read( 0x0005 ) , HEX );
+  lcd.print( tanglib_read( 0x0006 ) , HEX );
+  lcd.print( tanglib_read( 0x0007 ) , HEX );
+  lcd.print( tanglib_read( 0x0008 ) , HEX );
+  lcd.print( tanglib_read( 0x0009 ) , HEX );
+  lcd.print( tanglib_read( 0x000A ) , HEX );
+  lcd.print( tanglib_read( 0x000B ) , HEX );
+  lcd.print( tanglib_read( 0x000C ) , HEX );
+  lcd.print( tanglib_read( 0x000D ) , HEX );
+  lcd.print( tanglib_read( 0x000E ) , HEX );
+  lcd.print( tanglib_read( 0x000F ) , HEX );
+  
+
+
+
+
+
+
+
+  // lcd.setCursor(0,1);
+  // lcd.print("Pass all!");
+
+
+
+}
 
 
 

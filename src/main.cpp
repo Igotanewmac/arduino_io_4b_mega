@@ -1669,7 +1669,7 @@ void test0D() {
 
   // bank fill with halts
   for ( uint16_t i = TANG_CMD_START ; i <= TANG_CMD_END ; i++ ) {
-    tanglib_write( i , 0x01 );
+    tanglib_write( i , 0x00 );
   }
 
   lcd.setCursor( 0 , 1 );

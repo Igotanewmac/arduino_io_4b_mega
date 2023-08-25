@@ -245,43 +245,56 @@ void menucommand_00() {
 
 
 
-void test01();
-void test02();
-void test03();
-void test04();
-void test05();
-void test06();
-void test07();
-void test08();
-void test09();
-void test0A();
-void test0B();
-void test0C();
-void test0D();
-void test0E();
-void test0F();
-void test10();
-void test11();
-void test12();
-void test13();
-void test14();
-void test15();
-void test16();
-void test17();
-void test18();
-void test19();
-void test1A();
-void test1B();
-void test1C();
-void test1D();
-void test1E();
-void test1F();
 
 
 
 
 
 
+
+
+void showbyte() {
+  lcd.clear();
+
+  lcd.print( tanglib_read( 0x0000 ) , HEX );
+  
+  lcd.print(":");
+
+  lcd.print( tanglib_read( 0xC000 ) , HEX );
+  
+}
+
+
+
+void bankfill( uint8_t banksel , uint8_t databyte ) {
+
+  // set bank select register
+  tanglib_write( 0x0000 , 0x10 );
+  tanglib_write( 0x0001 , banksel );
+  
+  // bankfill A with immedeate
+  tanglib_write( 0x0002 , 0x14 );
+  tanglib_write( 0x0003 , databyte );
+
+  // end
+  //tanglib_write( 0x0004 , 0x01 );
+
+  tanglib_execute();
+
+  delay(1);
+  tanglib_reset();
+
+}
+
+
+
+
+void bankclear() {
+  bankfill(0x00,0x00);
+  bankfill(0x40,0x00);
+  bankfill(0x80,0x00);
+  bankfill(0xC0,0x00);
+}
 
 
 
@@ -1305,25 +1318,25 @@ void test0B() {
 // 
 // set operand A into usr_data_0
 // set operand B into usr_data_1
-
+// 
 // copy usr_data_0 to cpu_data_0
 // copy usr_data_1 to cpu_data_1
 // clear usr_data_2 to zero
-
+// 
 // loop1 first operand
 // decrement cpu_data_0
 // increment usr_data_2
 // jmpnz cpu_data_0 loop1
-
+// 
 // loop2 second operand
 // decrement cpu_data_1
 // increment usr_data_2
 // jmpnz cpu_data_1 loop2
-
+// 
 // set register select to usr_data_2 > wideptr0
-
+// 
 // copy register A to register B
-
+// 
 // finish
 
 void test0C() {
@@ -2013,6 +2026,7 @@ void test11() {
   lcd.setCursor(0,1);
   lcd.print("Bankfill");
 
+  bankclear();
 
   lcd.setCursor( 0 , 1 );
   lcd.print("                ");
@@ -2042,7 +2056,75 @@ void test11() {
 
   
   stopwatch_start();
-  tanglib_execute_and_wait();
+  //tanglib_execute_and_wait();
+  stopwatch_stop();
+
+  
+  lcd.clear();
+  lcd.print(stopwatch_duration());
+  lcd.setCursor(0,1);
+  // read dst 0
+  lcd.print( tanglib_read( 0xC000 ) , HEX );
+  
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// jmp rel fwd
+
+
+void test12() {
+
+  lcd.clear();
+  lcd.print("Test 12");
+
+
+  tanglib_reset();
+  
+  lcd.setCursor(0,1);
+  lcd.print("Bankfill");
+
+  bankclear();
+
+  lcd.setCursor( 0 , 1 );
+  lcd.print("                ");
+  lcd.print("Checking");
+
+
+
+
+  uint16_t address = TANG_CMD_START;
+
+
+  // set register to check usr_data_0
+
+  // set address register to target
+
+  // jump
+
+  // set register test fail result
+
+  // stop
+
+
+
+
+
+  tanglib_write( address , 0x00 );
+
+  
+  stopwatch_start();
+  //tanglib_execute_and_wait();
   stopwatch_stop();
 
   
@@ -2073,45 +2155,6 @@ void test11() {
 
 
 
-void showbyte() {
-  lcd.clear();
-
-  lcd.print( tanglib_read( 0x0000 ) , HEX );
-  
-  lcd.print(":");
-
-  lcd.print( tanglib_read( 0xC000 ) , HEX );
-  
-}
-
-
-
-void bankfill( uint8_t banksel , uint8_t databyte ) {
-
-  // set bankfil register
-  tanglib_write( 0x0000 , 0x10 );
-  tanglib_write( 0x0001 , banksel );
-  
-  // bankfill A with immedeate
-  tanglib_write( 0x0002 , databyte );
-
-  // end
-  tanglib_write( 0x0003 , 0x01 );
-
-  tanglib_execute_and_wait();
-
-}
-
-
-
-
-void clear() {
-  bankfill(0x00,0x00);
-  bankfill(0x40,0x00);
-  bankfill(0x80,0x00);
-  bankfill(0xC0,0x00);
-}
-
 
 
 void menucommand_01() {
@@ -2121,7 +2164,7 @@ void menucommand_01() {
 
 
 void menucommand_02() {
-  test0D();
+  test02();
   while(1);
 }
 

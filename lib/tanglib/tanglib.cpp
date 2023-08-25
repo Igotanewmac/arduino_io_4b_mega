@@ -229,9 +229,10 @@ void tanglib_execute_and_wait() {
 
 
 
-void tanglib_execute_and_wait() {
+void tanglib_execute() {
 
     digitalWrite( TANGLIB_EXECUTE , HIGH );
+    delay(1);
 
     digitalWrite( TANGLIB_EXECUTE , LOW );
 

@@ -1453,206 +1453,6 @@ void test0C() {
 
 // test 0D jmp test.
 
-// jmp immed
-// jmp ptr
-// jmpz immed
-// jmpz ptr
-// jmpnz immed
-// jmpnz ptr
-
-
-
-
-
-
-
-
-
-
-
-// test of jmpi
-
-// 0x00 set
-// 0x00 usr_data_0
-// 0x00 0
-
-// 0x00 jmp
-// 0x00 immed
-// 0x00 addrh
-// 0x00 addrl
-
-// 0x00 set
-// 0x00 usr_data_0
-// 0x00 1
-
-
-
-
-
-
-
-
-
-
-// test of jmpp
-
-// 0x10 set
-// 0x10 usr_addr_0
-// 0x10 addrh
-// 0x10 set
-// 0x10 usr_addr_0
-// 0x10 addrl
-
-// 0x10 jmp
-// 0x10 ptr
-// 0x10 rsel usr_address_0
-
-// 0x10 set
-// 0x10 usr_data_0
-// 0x10 2
-
-
-
-
-
-
-
-
-
-
-// test of jmpzi
-
-// 0x20 set
-// 0x20 usr_data_1
-// 0x20 0
-
-// 0x20 jmp
-// 0x20 zero, immed
-// 0x20 addrh
-// 0x20 addrl
-
-// 0x20 set
-// 0x20 usr_data_0
-// 0x20 3
-
-
-
-
-
-
-
-
-
-
-// test of jmpzp
-
-// 0x30 set
-// 0x30 usr_data_1
-// 0x30 0
-
-// 0x30 set
-// 0x30 usr_address_1
-// 0x30 addrh
-// 0x30 set
-// 0x30 usr_address_1
-// 0x30 addrl
-
-// 0x30 jmp
-// 0x30 zero, pointer
-// 0x30 rsel usr_data_1
-// 0x30 rsel usr_address_1
-
-// 0x30 set
-// 0x30 usr_data_0
-// 0x30 4
-
-
-
-
-
-
-
-
-
-// test of jmpnzi
-
-// 0x40 set
-// 0x40 usr_data_1
-// 0x40 1
-
-// 0x40 jmp
-// 0x40 not zero, immed
-// 0x40 addrh
-// 0x40 addrl
-
-// 0x40 set
-// 0x40 usr_data_0
-// 0x40 5
-
-
-
-
-
-
-
-
-
-// test of jmpnzp
-
-// 0x50 set
-// 0x50 usr_data_1
-// 0x50 1
-
-// 0x50 set
-// 0x50 usr_address_1
-// 0x50 addrh
-// 0x50 set
-// 0x50 usr_address_1
-// 0x50 addrl
-
-// 0x50 jmp
-// 0x50 not zero, pointer
-// 0x50 rsel usr_data_1
-// 0x50 rsel usr_address_1
-
-// 0x50 set
-// 0x50 usr_data_0
-// 0x50 6
-
-
-
-
-
-
-
-
-// 0x60 set
-// 0x60 usr_wideptr_0
-// 0x60 addrh
-// 0x60 set
-// 0x60 usr_wideptr_0
-// 0x60 adrl
-
-// 0x60 set register select register
-// 0x60 usr_data_0
-// 0x60 usr_wideptr_0
-
-// 0x60 copy data from A to B
-
-// 0x60 finish
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 void test0D() {
@@ -1939,7 +1739,8 @@ void test0D() {
 
 
 
-
+  // stop at end
+  tanglib_write( TANG_CMD_END , 0x01 );
 
 
 
@@ -1952,6 +1753,311 @@ void test0D() {
 
 
 }
+
+
+
+
+// 0x48 c = A xor B
+
+
+void test0E() {
+
+  lcd.clear();
+  lcd.print("Test 0E");
+
+  uint16_t address = TANG_CMD_START;
+
+  tanglib_reset();
+  
+  
+
+
+
+
+
+  // program
+  // 
+  // load AA into usr_data_0
+  // load AA into usr_data_1
+  // xor A B C
+  // load wideptr
+  // copy C to wideptr
+  // halt
+
+  
+  // program
+  // 
+  // load A into usr_data_0
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0xAA );
+  // load B into usr_data_1
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x01 );
+  tanglib_write( address++ , 0x00 );
+  // xor A B C
+  tanglib_write( address++ , 0x48 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x01 );
+  tanglib_write( address++ , 0x02 );
+  // load wideptr
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x80 );
+  tanglib_write( address++ , 0xC0 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x00 );
+  // set register select
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x02 );
+  tanglib_write( address++ , 0x80 );
+  // copy C to wideptr
+  tanglib_write( address++ , 0x23 );
+  // halt
+  tanglib_write( address++ , 0x01 );
+  
+
+  tanglib_execute_and_wait();
+  
+
+  lcd.setCursor(0,1);
+  // read dst 0
+  lcd.print( tanglib_read( 0xC000 ) , HEX );
+
+
+
+
+}
+
+
+
+
+// loop using xor comparison
+
+
+void test0F() {
+
+  lcd.clear();
+  lcd.print("Test 0F");
+
+  uint16_t address = TANG_CMD_START;
+
+  tanglib_reset();
+  
+  
+
+
+  // load everything!
+
+  // set usr_data_0 to mincounter
+  // set usr_data_1 to maxcounter
+  // loopstart:
+  // increment usr_data_0
+  // increment usr_data_3
+  // usr_data_2 = usr_data_0 xor usr_data_1
+  // jmpnz usr_data_2 loopstart
+  // copy data out
+  // halt
+
+
+  // program
+  // 
+  
+  
+  // set usr_data_0 to mincounter
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x05 );
+  // set usr_data_1 to maxcounter
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x01 );
+  tanglib_write( address++ , 0x09 );
+  // loopstart:
+  // increment usr_data_0
+  tanglib_write( address++ , 0x30 );
+  tanglib_write( address++ , 0x00 );
+  // increment usr_data_3
+  tanglib_write( address++ , 0x30 );
+  tanglib_write( address++ , 0x03 );
+
+  // usr_data_2 = usr_data_0 xor usr_data_1
+  tanglib_write( address++ , 0x48 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x01 );
+  tanglib_write( address++ , 0x02 );
+
+  // jmpnz usr_data_2 immed to loopstart
+  tanglib_write( address++ , 0x50 );
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x02 );
+  tanglib_write( address++ , 0x00 );
+  tanglib_write( address++ , 0x06 );
+  
+  // copy data out
+  // load wideptr
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x80 );
+  tanglib_write( address++ , 0xC0 );
+  tanglib_write( address++ , 0x24 );
+  tanglib_write( address++ , 0x40 );
+  tanglib_write( address++ , 0x00 );
+  // set register select
+  tanglib_write( address++ , 0x20 );
+  tanglib_write( address++ , 0x03 );
+  tanglib_write( address++ , 0x80 );
+  // copy usr_data_3 to wideptr
+  tanglib_write( address++ , 0x23 );
+  
+  
+  // halt
+  tanglib_write( address++ , 0x01 );
+  
+
+  tanglib_execute_and_wait();
+  
+
+  lcd.setCursor(0,1);
+  // read dst 0
+  lcd.print( tanglib_read( 0xC000 ) , HEX );
+
+
+
+
+}
+
+
+
+
+
+
+void test10() {
+
+  lcd.clear();
+  lcd.print("Test 0F");
+
+
+  tanglib_reset();
+  
+
+    // bank fill with halts
+  for ( uint16_t i = TANG_CMD_START ; i <= TANG_CMD_END ; i++ ) {
+    tanglib_write( i , 0x00 );
+  }
+
+  lcd.setCursor( 0 , 1 );
+  lcd.print("Checking");
+
+
+
+
+  uint16_t address = TANG_CMD_END;
+
+  tanglib_write( address , 0x01 );
+
+  
+  
+
+
+  // load everything!
+
+  // set usr_data_0 to mincounter
+  // set usr_data_1 to maxcounter
+  // loopstart:
+  // increment usr_data_0
+  // increment usr_data_3
+  // usr_data_2 = usr_data_0 xor usr_data_1
+  // jmpnz usr_data_2 loopstart
+  // copy data out
+  // halt
+
+
+  // program
+  // 
+  
+  
+  stopwatch_start();
+  tanglib_execute_and_wait();
+  stopwatch_stop();
+
+  
+  lcd.clear();
+  lcd.print(stopwatch_duration());
+  lcd.setCursor(0,1);
+  // read dst 0
+  lcd.print( tanglib_read( 0xC000 ) , HEX );
+  
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// jump test
+
+void test11() {
+
+  lcd.clear();
+  lcd.print("Test 11");
+
+
+  tanglib_reset();
+  
+  lcd.setCursor(0,1);
+  lcd.print("Bankfill");
+
+
+  lcd.setCursor( 0 , 1 );
+  lcd.print("                ");
+  lcd.print("Checking");
+
+
+
+
+  uint16_t address = TANG_CMD_START;
+
+
+  // set register to check usr_data_0
+
+  // set address register to target
+
+  // jump
+
+  // set register test fail result
+
+  // stop
+
+
+
+
+
+  tanglib_write( address , 0x00 );
+
+  
+  stopwatch_start();
+  tanglib_execute_and_wait();
+  stopwatch_stop();
+
+  
+  lcd.clear();
+  lcd.print(stopwatch_duration());
+  lcd.setCursor(0,1);
+  // read dst 0
+  lcd.print( tanglib_read( 0xC000 ) , HEX );
+  
+
+
+
+
+}
+
 
 
 
@@ -1980,16 +2086,31 @@ void showbyte() {
 
 
 
+void bankfill( uint8_t banksel , uint8_t databyte ) {
+
+  // set bankfil register
+  tanglib_write( 0x0000 , 0x10 );
+  tanglib_write( 0x0001 , banksel );
+  
+  // bankfill A with immedeate
+  tanglib_write( 0x0002 , databyte );
+
+  // end
+  tanglib_write( 0x0003 , 0x01 );
+
+  tanglib_execute_and_wait();
+
+}
 
 
 
 
-
-
-
-
-
-
+void clear() {
+  bankfill(0x00,0x00);
+  bankfill(0x40,0x00);
+  bankfill(0x80,0x00);
+  bankfill(0xC0,0x00);
+}
 
 
 
@@ -2000,18 +2121,17 @@ void menucommand_01() {
 
 
 void menucommand_02() {
-  test02();
+  test0D();
   while(1);
 }
 
 
 void menucommand_03() {
-  test0D();
+  test11();
   while(1);
 }
 
 void menucommand_04() {
-  showbyte();
   while(1);
 }
 

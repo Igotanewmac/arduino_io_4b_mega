@@ -2347,6 +2347,7 @@ void test14() {
 
 
 
+
   // tanglib_write( address++ , 0x00 );
   
   // set usr_data_0 to 5
@@ -2428,7 +2429,6 @@ void menucommand_02() {
 
 
 void menucommand_03() {
-  test14();
   while(1);
 }
 

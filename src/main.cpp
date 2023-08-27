@@ -447,9 +447,9 @@ void test04() {
 
 
   // set the loopmin to usr_data_0
-  command_0x24_load_value_to_register( TANG_RSEL_DATA_0 , 0x01 );
+  command_0x24_load_value_to_register( TANG_RSEL_DATA_0 , 0x11 );
   // set the loopmax to usr_data_1
-  command_0x24_load_value_to_register( TANG_RSEL_DATA_1 , 0x05 );
+  command_0x24_load_value_to_register( TANG_RSEL_DATA_1 , 0xEF );
   // clear usr_data_2
   command_0x24_load_value_to_register( TANG_RSEL_DATA_2 , 0x00 );
 
@@ -474,7 +474,7 @@ void test04() {
   command_0x24_load_value_to_register( TANG_RSEL_WIDEPTR_LOW_0 , (uint8_t)( ( TANG_DST_START | 0x0000 ) & 0xFF ) );
   
   // set bank select to A usr_data_2 , B usr_wideptr_0
-  command_0x20_load_to_register_select( TANG_RSEL_DATA_3 , TANG_RSEL_WIDEPTR_0 );
+  command_0x20_load_to_register_select( TANG_RSEL_DATA_2 , TANG_RSEL_WIDEPTR_0 );
 
   // copy register A to memory pointed to by B
   command_0x23_write_rselA_to_rselB();

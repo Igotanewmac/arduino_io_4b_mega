@@ -243,10 +243,322 @@ void tanglib_execute() {
 
 
 
+// a 16 k buffer
+uint8_t commandstream[TANGLIB_COMMANDSTREAM_MAX];
+
+// the current position in the buffer
+uint16_t commandstreamindex = 0;
 
 
 
 
+void tanglib_commandstream_send() {
+
+    for ( uint32_t i = 0 ; i < commandstreamindex ; i++ ) {
+        tanglib_write( ( (uint16_t)i | TANG_CMD_START ) , commandstream[i] );
+    }
+
+}
+
+
+
+
+// opcode commands
+
+void tanglib_commandstream_reset( uint8_t databyte ) {
+    for ( uint32_t i = 0 ; i < TANGLIB_COMMANDSTREAM_MAX ; i++ ) {
+        commandstream[i] = databyte;
+    }
+    commandstreamindex = 0;
+}
+
+
+
+
+uint16_t tanglib_commandstream_getindex() {
+    return commandstreamindex;
+}
+
+
+
+
+
+
+
+
+
+void command_0x00_noop() {
+  commandstream[commandstreamindex++] = 0x00;
+}
+
+
+void command_0x01_halt() {
+  commandstream[commandstreamindex++] = 0x01;
+}
+
+
+
+void command_0x10_load_to_bank_select( uint8_t databyte ) {
+  commandstream[commandstreamindex++] = 0x10;
+  commandstream[commandstreamindex++] = databyte;
+}
+
+void command_0x11_write_bank_select_to_src() {
+  commandstream[commandstreamindex++] = 0x11;
+}
+
+void command_0x14_fill_bank_A( uint8_t databyte ) {
+  commandstream[commandstreamindex++] = 0x14;
+  commandstream[commandstreamindex++] = databyte;
+}
+
+
+
+void command_0x20_load_to_register_select( uint8_t databytehigh , uint8_t databytelow ) {
+  commandstream[commandstreamindex++] = 0x20;
+  commandstream[commandstreamindex++] = databytehigh;
+  commandstream[commandstreamindex++] = databytelow;
+}
+
+
+
+void command_0x21_write_register_select_to_src() {
+  commandstream[commandstreamindex++] = 0x21;
+}
+
+
+void command_0x23_write_rselA_to_rselB() {
+  commandstream[commandstreamindex++] = 0x23;
+}
+
+void command_0x24_load_value_to_register( uint8_t rsel , uint8_t databyte ) {
+  commandstream[commandstreamindex++] = 0x24;
+  commandstream[commandstreamindex++] = rsel;
+  commandstream[commandstreamindex++] = databyte;
+}
+
+void command_0x26_load_wideptr_to_rselA( uint8_t rsela , uint8_t rselb ) {
+  commandstream[commandstreamindex++] = 0x26;
+  commandstream[commandstreamindex++] = rsela;
+  commandstream[commandstreamindex++] = rselb;
+}
+
+
+void command_0x30_inc( uint8_t rsel ) {
+  commandstream[commandstreamindex++] = 0x30;
+  commandstream[commandstreamindex++] = rsel;
+}
+
+void command_0x34_dec( uint8_t rsel ) {
+  commandstream[commandstreamindex++] = 0x34;
+  commandstream[commandstreamindex++] = rsel;
+}
+
+
+void command_0x38_add( uint8_t rselA , uint8_t rselB , uint8_t rselC ) {
+  commandstream[commandstreamindex++] = 0x38;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+  commandstream[commandstreamindex++] = rselC;
+}
+
+
+void command_0x40_sub( uint8_t rselA , uint8_t rselB , uint8_t rselC ) {
+  commandstream[commandstreamindex++] = 0x40;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+  commandstream[commandstreamindex++] = rselC;
+}
+
+
+void command_0x42_and( uint8_t rselA , uint8_t rselB , uint8_t rselC ) {
+  commandstream[commandstreamindex++] = 0x42;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+  commandstream[commandstreamindex++] = rselC;  
+}
+
+
+void command_0x44_or( uint8_t rselA , uint8_t rselB , uint8_t rselC ) {
+  commandstream[commandstreamindex++] = 0x44;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+  commandstream[commandstreamindex++] = rselC;
+}
+
+
+void command_0x46_not( uint8_t rselA , uint8_t rselB ) {
+  commandstream[commandstreamindex++] = 0x46;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+}
+
+
+
+
+void command_0x48_xor( uint8_t rselA , uint8_t rselB , uint8_t rselC ) {
+  commandstream[commandstreamindex++] = 0x48;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+  commandstream[commandstreamindex++] = rselC;
+}
+
+
+
+
+
+
+void command_0x50_jmp_immed( uint16_t address ) {
+  commandstream[commandstreamindex++] = 0x50;
+  commandstream[commandstreamindex++] = 0x02;
+  commandstream[commandstreamindex++] = ( address >> 8 ) & 0xFF;
+  commandstream[commandstreamindex++] = address & 0xFF;
+}
+
+
+void command_0x50_jmp_rsel( uint8_t rsel ) {
+  commandstream[commandstreamindex++] = 0x50;
+  commandstream[commandstreamindex++] = 0x03;
+  commandstream[commandstreamindex++] = rsel;
+}
+
+
+void command_0x50_jmpz_immed( uint8_t rsel , uint16_t address ) {
+  commandstream[commandstreamindex++] = 0x50;
+  commandstream[commandstreamindex++] = 0x08;
+  commandstream[commandstreamindex++] = rsel;
+  commandstream[commandstreamindex++] = ( address >> 8 ) & 0xFF;
+  commandstream[commandstreamindex++] = address & 0xFF;
+}
+
+
+void command_0x50_jmpz_rsel( uint8_t rselA , uint8_t rselB ) {
+  commandstream[commandstreamindex++] = 0x50;
+  commandstream[commandstreamindex++] = 0x0C;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+}
+
+void command_0x50_jmpnz_immed( uint8_t rsel , uint16_t address ) {
+  commandstream[commandstreamindex++] = 0x50;
+  commandstream[commandstreamindex++] = 0x20;
+  commandstream[commandstreamindex++] = rsel;
+  commandstream[commandstreamindex++] = ( address >> 8 ) & 0xFF;
+  commandstream[commandstreamindex++] = address & 0xFF;
+}
+
+
+void command_0x50_jmpnz_rsel( uint8_t rselA , uint8_t rselB ) {
+  commandstream[commandstreamindex++] = 0x50;
+  commandstream[commandstreamindex++] = 0x30;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+}
+
+
+
+
+
+
+
+
+void command_0x52_jmp_rel_fwd_immed( uint16_t address ) {
+  commandstream[commandstreamindex++] = 0x52;
+  commandstream[commandstreamindex++] = 0x02;
+  commandstream[commandstreamindex++] = ( address >> 8 ) & 0xFF;
+  commandstream[commandstreamindex++] = address & 0xFF;
+}
+
+
+void command_0x52_jmp_rel_fwd_rsel( uint8_t rsel ) {
+  commandstream[commandstreamindex++] = 0x52;
+  commandstream[commandstreamindex++] = 0x03;
+  commandstream[commandstreamindex++] = rsel;
+}
+
+
+void command_0x52_jmpz_rel_fwd_immed( uint8_t rsel , uint16_t address ) {
+  commandstream[commandstreamindex++] = 0x52;
+  commandstream[commandstreamindex++] = 0x08;
+  commandstream[commandstreamindex++] = rsel;
+  commandstream[commandstreamindex++] = ( address >> 8 ) & 0xFF;
+  commandstream[commandstreamindex++] = address & 0xFF;
+}
+
+
+void command_0x52_jmpz_rel_fwd_rsel( uint8_t rselA , uint8_t rselB ) {
+  commandstream[commandstreamindex++] = 0x52;
+  commandstream[commandstreamindex++] = 0x0C;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+}
+
+void command_0x52_jmpnz_rel_fwd_immed( uint8_t rsel , uint16_t address ) {
+  commandstream[commandstreamindex++] = 0x52;
+  commandstream[commandstreamindex++] = 0x20;
+  commandstream[commandstreamindex++] = rsel;
+  commandstream[commandstreamindex++] = ( address >> 8 ) & 0xFF;
+  commandstream[commandstreamindex++] = address & 0xFF;
+}
+
+
+void command_0x52_jmpnz_rel_fwd_rsel( uint8_t rselA , uint8_t rselB ) {
+  commandstream[commandstreamindex++] = 0x52;
+  commandstream[commandstreamindex++] = 0x30;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+}
+
+
+
+
+
+void command_0x54_jmp_bk_rel_immed( uint16_t address ) {
+  commandstream[commandstreamindex++] = 0x54;
+  commandstream[commandstreamindex++] = 0x02;
+  commandstream[commandstreamindex++] = ( address >> 8 ) & 0xFF;
+  commandstream[commandstreamindex++] = address & 0xFF;
+}
+
+
+void command_0x54_jmp_bk_rel_rsel( uint8_t rsel ) {
+  commandstream[commandstreamindex++] = 0x54;
+  commandstream[commandstreamindex++] = 0x03;
+  commandstream[commandstreamindex++] = rsel;
+}
+
+
+void command_0x54_jmpz_bk_rel_immed( uint8_t rsel , uint16_t address ) {
+  commandstream[commandstreamindex++] = 0x54;
+  commandstream[commandstreamindex++] = 0x08;
+  commandstream[commandstreamindex++] = rsel;
+  commandstream[commandstreamindex++] = ( address >> 8 ) & 0xFF;
+  commandstream[commandstreamindex++] = address & 0xFF;
+}
+
+
+void command_0x54_jmpz_bk_rel_rsel( uint8_t rselA , uint8_t rselB ) {
+  commandstream[commandstreamindex++] = 0x54;
+  commandstream[commandstreamindex++] = 0x0C;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+}
+
+void command_0x54_jmpnz_bk_rel_immed( uint8_t rsel , uint16_t address ) {
+  commandstream[commandstreamindex++] = 0x54;
+  commandstream[commandstreamindex++] = 0x20;
+  commandstream[commandstreamindex++] = rsel;
+  commandstream[commandstreamindex++] = ( address >> 8 ) & 0xFF;
+  commandstream[commandstreamindex++] = address & 0xFF;
+}
+
+
+void command_0x54_jmpnz_bk_rel_rsel( uint8_t rselA , uint8_t rselB ) {
+  commandstream[commandstreamindex++] = 0x54;
+  commandstream[commandstreamindex++] = 0x30;
+  commandstream[commandstreamindex++] = rselA;
+  commandstream[commandstreamindex++] = rselB;
+}
 
 
 
